@@ -70,7 +70,7 @@ export function CreateItem({ currentPath, onItemCreated }: CreateItemProps) {
           Create
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Create New Item</DialogTitle>
         </DialogHeader>

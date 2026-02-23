@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileExplorer } from '@/components/FileExplorer';
-import { FileEditor } from '@/components/FileEditor';
+import { Explorer } from '@/components/Explorer/_index';
+import WorkspaceFooter from '@/components/Workspace/_index';
+import { FileEditor } from '@/components/FileViewer/_index';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable-panels';
 
 export default function Home() {
@@ -14,13 +15,17 @@ export default function Home() {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
-          <FileExplorer 
-            onFileSelect={setSelectedFile} 
-            selectedFile={selectedFile}
-            key={currentFolder}
-          />
+          <div className="flex flex-col h-full">
+            <div className="flex-1">
+              <Explorer 
+                onFileSelect={setSelectedFile} 
+                selectedFile={selectedFile}
+                key={currentFolder}
+              />
+            </div>
+            <WorkspaceFooter />
+          </div>
         </ResizablePanel>
-
         <ResizableHandle />
 
         <ResizablePanel defaultSize={80} minSize={40}>

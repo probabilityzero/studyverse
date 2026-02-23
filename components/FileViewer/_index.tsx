@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { X, Save } from 'lucide-react';
 import { MarkdownEditor } from './Markdown';
 import { HTMLEditor } from './HTML';
 import { PDFViewer } from './PDF';
-import { FolderViewer } from '@/components/viewers/FolderViewer';
+import { FolderViewer } from '@/components/Explorer/Folders';
 
 interface FileEditorProps {
   filePath: string | null;

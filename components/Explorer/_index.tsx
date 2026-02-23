@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Folder, File, RefreshCw, Settings } from 'lucide-react';
+import SettingsModal from '../SettingsModal';
 import { Button } from '@/components/ui/button';
 import { CreateItem } from '@/components/CreateItem';
-import { FolderPicker } from './FolderPicker';
-import { FileInlinePreview } from './viewers/FileInlinePreview';
+import { FolderPicker } from '../Workspace/SetWorkspaceModal';
 
 interface FileNode {
   name: string;
@@ -13,13 +13,13 @@ interface FileNode {
   path: string;
 }
 
-interface FileExplorerProps {
+interface ExplorerProps {
   onFileSelect: (path: string) => void;
   selectedFile: string | null;
 }
 
 
-export function FileExplorer({ onFileSelect, selectedFile }: FileExplorerProps) {
+export function Explorer({ onFileSelect, selectedFile }: ExplorerProps) {
   const [selectedFileState, setSelectedFile] = useState<string | null>(selectedFile);
   const [currentFolder, setCurrentFolder] = useState<string>('');
   const [files, setFiles] = useState<FileNode[]>([]);
@@ -47,6 +47,27 @@ export function FileExplorer({ onFileSelect, selectedFile }: FileExplorerProps) 
   useEffect(() => {
     loadCurrentFolder();
   }, []);
+
+  useEffect(() => {
+    const onRefresh = () => refreshDirectory();
+    const onBaseDirChanged = (e: any) => {
+      const p = e?.detail
+      if (p) {
+        setCurrentFolder(p)
+        setFiles([])
+        setLoading(true)
+        loadDirectory(p)
+      } else {
+        loadCurrentFolder()
+      }
+    }
+    window.addEventListener('workspace-refresh', onRefresh as EventListener)
+    window.addEventListener('workspace-base-dir-changed', onBaseDirChanged as EventListener)
+    return () => {
+      window.removeEventListener('workspace-refresh', onRefresh as EventListener)
+      window.removeEventListener('workspace-base-dir-changed', onBaseDirChanged as EventListener)
+    }
+  }, [currentPath])
 
   const handleFolderSelect = (folderPath: string) => {
     setCurrentFolder(folderPath);
@@ -153,12 +174,11 @@ export function FileExplorer({ onFileSelect, selectedFile }: FileExplorerProps) 
     return children.map((node) => (
       <div key={node.path}>
         <div
-          className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent rounded transition-colors ${
+          className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent transition-colors ${
             selectedFile === node.path ? 'bg-primary/10 text-primary' : 'text-foreground'
           }`}
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
           onClick={() => {
-            // clicking the entire row toggles expansion for both files and folders
             toggleExpanded(node.path);
           }}
         >
@@ -185,19 +205,13 @@ export function FileExplorer({ onFileSelect, selectedFile }: FileExplorerProps) 
               <span onClick={(e) => { e.stopPropagation(); handleFolderSelect(node.path); onFileSelect && onFileSelect(`dir:${node.path}`); }}>{node.name}</span>
             </>
           ) : (
-            <div className='flex items-center gap-1'>
+            <div className='flex items-center gap-1 w-full h-full' onClick={(e) => { e.stopPropagation(); onFileSelect(node.path); }}>
               <div className="w-3" />
               <File className="h-4 w-4" />
-              <span onClick={(e) => { e.stopPropagation(); onFileSelect(node.path); }}>{node.name}</span>
+              <span>{node.name}</span>
             </div>
           )}
         </div>
-        {expanded.has(node.path) && node.type === 'dir' && renderTree(node.path, depth + 1)}
-        {expanded.has(node.path) && node.type === 'file' && (
-          <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}>
-            <FileInlinePreview filePath={node.path} apiUrl={apiUrl} />
-          </div>
-        )}
       </div>
     ));
   };
@@ -208,10 +222,10 @@ export function FileExplorer({ onFileSelect, selectedFile }: FileExplorerProps) 
           <h3 className="font-medium pl-4 text-foreground uppercase">Explorer</h3>
           <CreateItem currentPath={currentPath} onItemCreated={handleItemCreated} />
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto font-light">
         {error ? (
           <div className="p-4">
-            <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+            <div className="text-sm text-red-600 bg-red-50 p-2">
               {error}
             </div>
             <Button onClick={refreshDirectory} size="sm" variant="outline">
@@ -224,29 +238,6 @@ export function FileExplorer({ onFileSelect, selectedFile }: FileExplorerProps) 
           <div className="py-2">{renderTree()}</div>
         )}
       </div>
-        <div className="h-10 flex items-center justify-between gap-4 px-3 border-t border-border text-foreground/80">
-          <FolderPicker onFolderSelect={handleFolderSelect} currentFolder={currentFolder} />
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={refreshDirectory}
-              disabled={loading}
-              className="h-7 w-7 p-0"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={refreshDirectory}
-              disabled={loading}
-              className="h-7 w-7 p-0"
-            >
-              <Settings className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </div>
     </div>
   );
 }

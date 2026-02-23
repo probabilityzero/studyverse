@@ -112,7 +112,7 @@ export function FolderPicker({ onFolderSelect, currentFolder }: FolderPickerProp
           My Workspace
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Select Base Folder</DialogTitle>
         </DialogHeader>
