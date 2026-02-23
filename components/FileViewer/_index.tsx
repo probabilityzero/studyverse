@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { MarkdownEditor } from './Markdown';
 import { HTMLEditor } from './HTML';
 import { PDFViewer } from './PDF';
-import { FolderViewer } from '@/components/Explorer/Folders';
+import { FolderViewer } from './Folder';
+import ViewerHeader from './ViewerHeader';
 
 interface FileEditorProps {
   filePath: string | null;
@@ -14,6 +15,7 @@ interface FileEditorProps {
 }
 
 export function FileEditor({ filePath, onClose, onSave, onOpenFile }: FileEditorProps) {
+  const [previewMode, setPreviewMode] = useState(true);
   const [content, setContent] = useState('');
   const [originalContent, setOriginalContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -90,8 +92,6 @@ export function FileEditor({ filePath, onClose, onSave, onOpenFile }: FileEditor
     }
   };
 
-  const isDirty = content !== originalContent;
-
   if (!filePath) {
     return (
       <div className="h-full flex items-center justify-center text-muted-foreground">
@@ -104,31 +104,46 @@ export function FileEditor({ filePath, onClose, onSave, onOpenFile }: FileEditor
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {error && <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm border-b border-border">{error}</div>}
-
       {loading ? (
         <div className="flex-1 flex items-center justify-center text-muted-foreground">Loading file...</div>
-      ) : (() => {
-        // support opening folders: explorer will pass paths prefixed with "dir:"
-        if (filePath && filePath.startsWith('dir:')) {
-          const folderPath = filePath.replace(/^dir:/, '');
-          return <div className="h-full"><FolderViewer folderPath={folderPath} apiUrl={apiUrl} onOpenFile={(p) => { if (p && p.startsWith('dir:')) { onOpenFile && onOpenFile(p); } else { onOpenFile && onOpenFile(p); } }} /></div>;
-        }
+      ) : (
+        <>
+          <ViewerHeader
+            filePath={filePath}
+            onSave={handleSave}
+            previewMode={previewMode}
+            setPreviewMode={setPreviewMode}
+            loading={loading}
+            saving={saving}
+          />
 
-        const ext = (filePath.split('.').pop() || '').toLowerCase();
-        if (ext === 'md' || ext === 'markdown') {
-          return <MarkdownEditor filePath={filePath} content={content} setContent={setContent} onSave={handleSave} loading={loading} saving={saving} />;
-        }
-        if (ext === 'html' || ext === 'htm') {
-          return <HTMLEditor filePath={filePath} content={content} setContent={setContent} onSave={handleSave} loading={loading} saving={saving} apiUrl={apiUrl} />;
-        }
-        if (ext === 'pdf') {
-          return <PDFViewer filePath={filePath} apiUrl={apiUrl} />;
-        }
-        return (
-          <textarea value={content} onChange={(e) => setContent(e.target.value)} className="flex-1 p-4 font-mono text-sm bg-background text-foreground border-0 focus:outline-none resize-none" placeholder="Start typing..." spellCheck="false" />
-        );
-      })()}
+          <div className="flex-1">
+            {filePath && filePath.startsWith('dir:') ? (
+              <div className="h-full"><FolderViewer folderPath={filePath.replace(/^dir:/, '')} apiUrl={apiUrl} onOpenFile={(p) => { onOpenFile && onOpenFile(p); }} /></div>
+            ) : (() => {
+              const ext = (filePath.split('.').pop() || '').toLowerCase();
+              if (ext === 'md' || ext === 'markdown') {
+                return <MarkdownEditor filePath={filePath} content={content} setContent={setContent} onSave={handleSave} loading={loading} saving={saving} previewMode={previewMode} />;
+              }
+              if (ext === 'html' || ext === 'htm') {
+                return previewMode ? (
+                  <HTMLEditor filePath={filePath} content={content} setContent={setContent} onSave={handleSave} loading={loading} saving={saving} apiUrl={apiUrl} />
+                ) : (
+                  <textarea value={content} onChange={(e) => setContent(e.target.value)} className="flex-1 p-4 font-mono text-sm bg-background text-foreground border-0 focus:outline-none resize-none" placeholder="Start typing..." spellCheck="false" />
+                )
+              }
+              if (ext === 'pdf') {
+                return <PDFViewer filePath={filePath} apiUrl={apiUrl} />;
+              }
+              return (
+                <textarea value={content} onChange={(e) => setContent(e.target.value)} className="flex-1 p-4 font-mono text-sm bg-background text-foreground border-0 focus:outline-none resize-none" placeholder="Start typing..." spellCheck="false" />
+              );
+            })()
+            }
+          </div>
+        </>
+      )}
+      {error && <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm border-b border-border">{error}</div>}
     </div>
   );
 }

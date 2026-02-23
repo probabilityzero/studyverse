@@ -8,6 +8,7 @@ import { registerCreateFileRoute } from './routes/createFile';
 import { registerCreateFolderRoute } from './routes/createFolder';
 import { registerRawRoute } from './routes/raw';
 import { registerWorkspacesRoute } from './routes/workspaces';
+import { registerRenameRoute } from './routes/rename';
 
 const app = new Hono();
 
@@ -28,6 +29,7 @@ registerCreateFileRoute(app);
 registerCreateFolderRoute(app);
 registerRawRoute(app);
 registerWorkspacesRoute(app);
+registerRenameRoute(app);
 
 app.get('/', (c) => c.json({ status: 'ok', message: 'File server running' }));
 

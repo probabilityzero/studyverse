@@ -47,14 +47,11 @@ export function PDFViewer({ filePath, apiUrl }: PDFViewerProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="h-10 flex items-center justify-between gap-2 px-4 py-2 border-b border-border">
-        <div className="text-sm font-medium">{filePath.split('/').pop()}</div>
-      </div>
       <div className="flex-1">
         {loading && <div className="p-4 text-sm text-muted-foreground">Loading PDF...</div>}
         {error && <div className="p-4 text-sm text-destructive">{error}</div>}
         {!loading && !error && blobUrl && <iframe src={blobUrl} className="w-full h-full border-0" title="pdf-viewer" />}
       </div>
     </div>
-  );
+  )
 }

@@ -47,9 +47,6 @@ export function FolderViewer({ folderPath, apiUrl, onOpenFile }: FolderViewerPro
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-        <div className="font-medium">Folder: {folderPath}</div>
-      </div>
       <div className="flex-1 overflow-auto p-4">
         {loading && <div className="text-sm text-muted-foreground">Loading...</div>}
         {error && <div className="text-sm text-destructive">{error}</div>}

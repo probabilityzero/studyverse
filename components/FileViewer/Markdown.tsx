@@ -1,8 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-
 interface MarkdownEditorProps {
   filePath: string;
   content: string;
@@ -10,6 +7,8 @@ interface MarkdownEditorProps {
   onSave: () => Promise<void>;
   loading?: boolean;
   saving?: boolean;
+  previewMode?: boolean;
+  setPreviewMode?: (v: boolean) => void;
 }
 
 const simpleMarkdownToHtml = (md: string) => {
@@ -27,18 +26,11 @@ const simpleMarkdownToHtml = (md: string) => {
   return html;
 };
 
-export function MarkdownEditor({ filePath, content, setContent, onSave, loading, saving }: MarkdownEditorProps) {
-  const [preview, setPreview] = useState(true);
+export function MarkdownEditor({ filePath, content, setContent, onSave, loading, saving, previewMode }: MarkdownEditorProps) {
+  const preview = previewMode ?? true
 
   return (
     <div className="h-full flex flex-col">
-      <div className="h-10 flex items-center justify-between gap-2 px-4 py-2 border-b border-border">
-        <div className="text-sm font-medium">{filePath.split('/').pop()}</div>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => setPreview((p) => !p)}>{preview ? 'Editor' : 'Preview'}</Button>
-          <Button size="sm" onClick={onSave} disabled={saving || loading}>Save</Button>
-        </div>
-      </div>
       <div className="flex-1 flex">
         {preview ? (
           <div className="flex-1 overflow-auto p-4 prose" dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(content) }} />
@@ -47,5 +39,5 @@ export function MarkdownEditor({ filePath, content, setContent, onSave, loading,
         )}
       </div>
     </div>
-  );
+  )
 }

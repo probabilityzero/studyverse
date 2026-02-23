@@ -14,7 +14,7 @@ export default function Home() {
     <main className="h-screen w-full flex flex-col bg-background">
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
+        <ResizablePanel defaultSize={20} minSize={20} maxSize={25}>
           <div className="flex flex-col h-full">
             <div className="flex-1">
               <Explorer 
