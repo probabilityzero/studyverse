@@ -50,6 +50,8 @@ export default function ContextMenu() {
   }
 
   const handleCreate = async (type: 'file' | 'folder') => {
+    const name = window.prompt(`Enter ${type} name`)?.trim()
+    if (!name) return
     const getParent = (p: string) => {
       if (!p) return '/'
       const parts = p.split('/').filter(Boolean)
@@ -60,6 +62,8 @@ export default function ContextMenu() {
     const folder = targetType === 'dir' || targetType === 'explorer'
       ? (targetPath || '/')
       : (targetType === 'file' ? getParent(targetPath) : '/')
+    const normalizedFolder = folder === '/' ? '' : folder
+    const path = `${normalizedFolder}/${name}`.replace(/\/+/g, '/')
 
     // dispatch event so Explorer can create inline
     window.dispatchEvent(new CustomEvent('workspace-create', { detail: { type, parent: folder } }))

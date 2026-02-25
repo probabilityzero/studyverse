@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, ReactElement } from 'react';
-import { ChevronRight, ChevronDown, Folder, File, RefreshCw, Settings } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ChevronRight, ChevronDown, Folder, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FileNode {
@@ -81,8 +81,10 @@ export function Explorer({ onFileSelect, selectedFile }: ExplorerProps) {
       const d = e?.detail
       if (!d) return
       const parent = String(d.parent || '/')
+      // expand parent so new entry is visible
       setExpanded((prev) => new Set(prev).add(parent))
       setInlineEdit({ mode: 'create', parent, isFolder: d.type === 'folder', name: '' })
+      // focus will be handled by effect below
     }
     const onWorkspaceRename = (e: any) => {
       const d = e?.detail
@@ -258,109 +260,52 @@ export function Explorer({ onFileSelect, selectedFile }: ExplorerProps) {
 
   const renderTree = (parentPath: string = '/', depth: number = 0) => {
     const children = getChildrenForPath(parentPath);
-
-    const rows: ReactElement[] = []
-
-    if (inlineEdit.mode === 'create' && (inlineEdit.parent || '/') === parentPath) {
-      rows.push(
-        <div key="__create__" className={`flex items-center gap-1 px-2 py-1 text-sm bg-accent/10 rounded`} style={{ paddingLeft: `${depth * 16 + 8}px` }}>
-          <div className="w-3" />
-          <div className="h-4 w-4 bg-muted/50 rounded-sm" />
-          <input
-            ref={inlineInputRef}
-            className="flex-1 bg-transparent outline-none text-sm px-2"
-            value={inlineEdit.name || ''}
-            onChange={(e) => setInlineEdit((s) => ({ ...s, name: e.target.value }))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') commitCreate((e.target as HTMLInputElement).value.trim())
-              if (e.key === 'Escape') setInlineEdit({ mode: null })
-            }}
-            onBlur={(e) => { const v = (e.target as HTMLInputElement).value.trim(); if (v) commitCreate(v); else setInlineEdit({ mode: null }) }}
-            placeholder={inlineEdit.isFolder ? 'New folder name' : 'New file name'}
-          />
-        </div>
-      )
-    }
-
-    children.forEach((node) => {
-      const isRenameTarget = inlineEdit.mode === 'rename' && inlineEdit.target === node.path
-
-      rows.push(
-        <div key={node.path}>
-          <div
-            data-context={node.type === 'dir' ? 'dir' : 'file'}
-            data-path={node.path}
-            className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent transition-colors ${
-              selectedFile === node.path ? 'bg-primary/10 text-primary' : 'text-foreground'
-            }`}
-            style={{ paddingLeft: `${depth * 16 + 8}px` }}
-            onClick={() => {
-              toggleExpanded(node.path);
-            }}
-          >
-            {node.type === 'dir' ? (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-8 p-0"
-                  onClick={(e) => { e.stopPropagation(); toggleExpanded(node.path); }}
-                >
-                  {expanded.has(node.path) ? (
-                    <div className="flex items-center">
-                      <ChevronRight className="h-3 w-3 gap-1" />
-                      <Folder className="h-4 w-4" />
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <ChevronDown className="h-3 w-3 gap-1" />
-                      <Folder className="fill-foreground h-4 w-4" />
-                    </div>
-                  )}
-                </Button>
-                {isRenameTarget ? (
-                  <input
-                    ref={inlineInputRef}
-                    className="flex-1 bg-transparent outline-none text-sm px-2"
-                    value={inlineEdit.name || ''}
-                    onChange={(e) => setInlineEdit((s) => ({ ...s, name: e.target.value }))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') commitRename((e.target as HTMLInputElement).value.trim())
-                      if (e.key === 'Escape') setInlineEdit({ mode: null })
-                    }}
-                    onBlur={(e) => { const v = (e.target as HTMLInputElement).value.trim(); if (v) commitRename(v); else setInlineEdit({ mode: null }) }}
-                  />
+    
+    return children.map((node) => (
+      <div key={node.path}>
+        <div
+          data-context={node.type === 'dir' ? 'dir' : 'file'}
+          data-path={node.path}
+          className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent transition-colors ${
+            selectedFile === node.path ? 'bg-primary/10 text-primary' : 'text-foreground'
+          }`}
+          style={{ paddingLeft: `${depth * 16 + 8}px` }}
+          onClick={() => {
+            toggleExpanded(node.path);
+          }}
+        >
+          {node.type === 'dir' ? (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-8 p-0"
+                onClick={(e) => { e.stopPropagation(); toggleExpanded(node.path); }}
+              >
+                {expanded.has(node.path) ? (
+                  <div className="flex items-center">
+                    <ChevronRight className="h-3 w-3 gap-1" />
+                    <Folder className="h-4 w-4" />
+                  </div>
                 ) : (
-                  <span onClick={(e) => { e.stopPropagation(); handleFolderSelect(node.path); onFileSelect && onFileSelect(`dir:${node.path}`); }}>{node.name}</span>
+                  <div className="flex items-center">
+                    <ChevronDown className="h-3 w-3 gap-1" />
+                    <Folder className="fill-foreground h-4 w-4" />
+                  </div>
                 )}
-              </>
-            ) : (
-              <div className='flex items-center gap-1 w-full h-full' onClick={(e) => { e.stopPropagation(); onFileSelect(node.path); }}>
-                <div className="w-3" />
-                <File className="h-4 w-4" />
-                {isRenameTarget ? (
-                  <input
-                    ref={inlineInputRef}
-                    className="flex-1 bg-transparent outline-none text-sm px-2"
-                    value={inlineEdit.name || ''}
-                    onChange={(e) => setInlineEdit((s) => ({ ...s, name: e.target.value }))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') commitRename((e.target as HTMLInputElement).value.trim())
-                      if (e.key === 'Escape') setInlineEdit({ mode: null })
-                    }}
-                    onBlur={(e) => { const v = (e.target as HTMLInputElement).value.trim(); if (v) commitRename(v); else setInlineEdit({ mode: null }) }}
-                  />
-                ) : (
-                  <span>{node.name}</span>
-                )}
-              </div>
-            )}
-          </div>
+              </Button>
+              <span onClick={(e) => { e.stopPropagation(); handleFolderSelect(node.path); onFileSelect && onFileSelect(`dir:${node.path}`); }}>{node.name}</span>
+            </>
+          ) : (
+            <div className='flex items-center gap-1 w-full h-full' onClick={(e) => { e.stopPropagation(); onFileSelect(node.path); }}>
+              <div className="w-3" />
+              <File className="h-4 w-4" />
+              <span>{node.name}</span>
+            </div>
+          )}
         </div>
-      )
-    })
-
-    return rows
+      </div>
+    ));
   };
 
   return (

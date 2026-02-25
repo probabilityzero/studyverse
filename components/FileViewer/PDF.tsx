@@ -46,7 +46,7 @@ export function PDFViewer({ filePath, apiUrl }: PDFViewerProps) {
   }, [filePath, apiUrl]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-background">
       <div className="flex-1">
         {loading && <div className="p-4 text-sm text-muted-foreground">Loading PDF...</div>}
         {error && <div className="p-4 text-sm text-destructive">{error}</div>}

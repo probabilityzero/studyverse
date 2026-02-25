@@ -1,5 +1,9 @@
 'use client';
 
+import { useState } from 'react'
+import FileToolbar from './_toolbar'
+import { Button } from '@/components/ui/button'
+
 interface MarkdownEditorProps {
   filePath: string;
   content: string;
@@ -7,8 +11,6 @@ interface MarkdownEditorProps {
   onSave: () => Promise<void>;
   loading?: boolean;
   saving?: boolean;
-  previewMode?: boolean;
-  setPreviewMode?: (v: boolean) => void;
 }
 
 const simpleMarkdownToHtml = (md: string) => {
@@ -26,11 +28,15 @@ const simpleMarkdownToHtml = (md: string) => {
   return html;
 };
 
-export function MarkdownEditor({ filePath, content, setContent, onSave, loading, saving, previewMode }: MarkdownEditorProps) {
-  const preview = previewMode ?? true
+export function MarkdownEditor({ filePath, content, setContent, onSave, loading, saving }: MarkdownEditorProps) {
+  const [preview, setPreview] = useState(true)
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-background">
+      <FileToolbar filePath={filePath} onSave={onSave} loading={loading} saving={saving}>
+        <Button size="sm" variant="outline" onClick={() => setPreview((p) => !p)}>{preview ? 'Editor' : 'Preview'}</Button>
+      </FileToolbar>
+
       <div className="flex-1 flex">
         {preview ? (
           <div className="flex-1 overflow-auto p-4 prose" dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(content) }} />
