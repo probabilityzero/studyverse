@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import FileToolbar from './_toolbar'
+import FileToolbar, { ViewModeToggle, AiChatControl } from './_toolbar'
 import AiChat from './AiChat'
-import { Button } from '@/components/ui/button'
 import { useEffect, useRef } from 'react'
 
 interface HTMLEditorProps {
@@ -28,12 +27,9 @@ export function HTMLEditor({ filePath, content, setContent, onSave, loading, sav
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <FileToolbar filePath={filePath} onSave={onSave} loading={loading} saving={saving} saveVisible={((viewMode === 'editor' || viewMode === 'both') && content !== originalRef.current)}>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setViewMode('editor')} className={viewMode === 'editor' ? 'bg-primary/10' : ''}>Editor</Button>
-          <Button size="sm" variant="outline" onClick={() => setViewMode('preview')} className={viewMode === 'preview' ? 'bg-primary/10' : ''}>Preview</Button> 
-          <Button size="sm" variant="outline" onClick={() => setChatOpen(true)}>AI Chat</Button>
-        </div>
+      <FileToolbar filePath={filePath} onSave={onSave} loading={loading} saving={saving}>
+        <ViewModeToggle value={viewMode} onChange={(v) => setViewMode(v)} />
+        <AiChatControl onClick={() => setChatOpen(true)} />
       </FileToolbar>
 
       <div className="flex-1 flex">

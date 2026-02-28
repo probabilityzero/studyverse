@@ -61,7 +61,7 @@ export default function AiChat({ open, onClose }: AiChatProps) {
           <div className="flex-1 overflow-auto text-sm">This is a simple AI chat panel placeholder. Connect your AI backend here.</div>
           <div className="mt-2 flex gap-2">
             <input className="flex-1 px-2 py-1 border border-border rounded" placeholder="Ask something..." />
-            <button className="px-3 py-1 bg-primary text-white rounded">Send</button>
+            <button className="px-3 py-1 rounded">Send</button>
           </div>
         </div>
       )}
