@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MarkdownEditor } from './Markdown';
 import { HTMLEditor } from './HTML';
 import { PDFViewer } from './PDF';
@@ -89,6 +89,33 @@ export function FileEditor({ filePath, onClose, onSave, onOpenFile }: FileEditor
       setSaving(false);
     }
   };
+
+  // Auto-save: debounce changes and save automatically for regular editable files
+  const saveTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!filePath) return;
+    if (loading || saving) return;
+    if (filePath.startsWith('dir:')) return; // folders
+    const ext = (filePath.split('.').pop() || '').toLowerCase();
+    if (ext === 'pdf') return; // don't auto-save binary viewers
+
+    if (content === originalContent) return; // nothing to save
+
+    // debounce
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+    }
+    saveTimer.current = window.setTimeout(() => {
+      handleSave();
+    }, 1500);
+
+    return () => {
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+      }
+    };
+  }, [content, filePath, loading, saving, originalContent]);
 
   if (!filePath) {
     return (

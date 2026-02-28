@@ -36,12 +36,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <body className="font-sans min-h-screen antialiased">
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         {children}
         <ContextMenu />
-      </body>
       </ThemeProvider>
+      </body>
     </html>
   )
 }
