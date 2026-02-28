@@ -47,7 +47,7 @@ export function HTMLEditor({ filePath, content, setContent, onSave, loading, sav
         )}
       </div>
 
-      <AiChat open={chatOpen} onClose={() => setChatOpen(false)} />
+      <AiChat open={chatOpen} onClose={() => setChatOpen(false)} filePath={filePath} />
     </div>
   );
 }

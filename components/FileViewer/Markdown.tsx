@@ -1,7 +1,7 @@
  'use client';
 
 import { useState } from 'react'
-import FileToolbar, { TogglePreviewControl } from './_toolbar'
+import FileToolbar, { TogglePreviewControl, ViewModeToggle } from './_toolbar'
 
 interface MarkdownEditorProps {
   filePath: string;
@@ -28,17 +28,18 @@ const simpleMarkdownToHtml = (md: string) => {
 };
 
 export function MarkdownEditor({ filePath, content, setContent, onSave, loading, saving }: MarkdownEditorProps) {
-  const [preview, setPreview] = useState(true)
+  const [viewMode, setViewMode] = useState<'preview' | 'editor' | 'both'>('preview')
   return (
     <div className="h-full flex flex-col bg-background">
       <FileToolbar filePath={filePath} onSave={onSave} loading={loading} saving={saving}>
-        <TogglePreviewControl onClick={() => setPreview((p) => !p)} label={preview ? 'Editor' : 'Preview'} active={!preview} />
+        <ViewModeToggle value={viewMode} onChange={(v) => setViewMode(v)} />
       </FileToolbar>
 
       <div className="flex-1 flex">
-        {preview ? (
+        {viewMode === 'preview' && (
           <div className="flex-1 overflow-auto p-4 prose" dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(content) }} />
-        ) : (
+        )}
+        {viewMode === 'editor' && (
           <textarea value={content} onChange={(e) => setContent(e.target.value)} className="flex-1 p-4 font-mono text-sm bg-background text-foreground border-0 focus:outline-none" />
         )}
       </div>
